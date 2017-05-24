@@ -1,5 +1,18 @@
 /* ======= Model ======= */
 var map;
+var ViewModel = {
+	Locations: ko.observableArray([new location11('Park Ave Penthouse'),
+	new location11('Chelsea Loft'),
+	new location11('Union Square Open Floor Plan'),
+	new location11('East Village Hip Studio'),
+	new location11('TriBeCa Artsy Bachelor Pad'),
+	new location11('Chinatown Homey Space')])
+};
+
+function location11 (name){
+	this.name = name;
+	this.appear=ko.observable(true);
+}
 // Create a new blank array for all the listing markers.
 var markers = [];
 // This global polygon variable is to ensure only ONE polygon is rendered.
@@ -280,7 +293,6 @@ var initMap = function()
 		'click', function (){
 			showInfoWindow('Chinatown Homey Space');
 	});
-
 	document.getElementById('show-listings').addEventListener(
 		'click', showListings);
 	document.getElementById('hide-listings').addEventListener(
@@ -694,12 +706,13 @@ var filterMarkersAndList = function ()
 }
 var showVisibility = function (idd) {
     document.getElementById("location" + idd).style.display = "block";
+    document.getElementById("location" + idd).appear = ko.observable(true);
 }
 
 var hideVisibility = function (idd) 
 {
-	//window.alert(list_locations[idd-1]);
     document.getElementById("location" + idd).style.display = "none";
+    document.getElementById("location" + idd).appear = ko.observable(false);
 }
 // hide all unmatched locations
 var hideMarkerAndItemLocation = function (unmatched_location, matched_location)
@@ -749,4 +762,4 @@ var create_marker_place = function (places)
 }
 
 
-ko.applyBindings(new initMap());
+ko.applyBindings(ViewModel);
