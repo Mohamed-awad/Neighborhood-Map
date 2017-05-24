@@ -12,13 +12,10 @@
 				<input id="filter-text" type="text" onkeydown="showAll()" placeholder="EX: Park Ave">
 				<input id="filter" type="button" value="Filter">
 				<br>
-				<ul>
-					<li id="location1">Park Ave Penthouse</li>
-					<li id="location2">Chelsea Loft</li>
-					<li id="location3">Union Square Open Floor Plan</li>
-					<li id="location4">East Village Hip Studio</li>
-					<li id="location5">TriBeCa Artsy Bachelor Pad</li>
-					<li id="location6">Chinatown Homey Space</li>
+				<ul data-bind="foreach:Locations">
+					<li>
+						<span data-bind="text:name, attr: {'id': 'location'+($index()+1), visible:appear}"></span>
+					</li>
 				</ul>
 			</div>
 			<hr>
