@@ -6,12 +6,19 @@ var ViewModel = {
 	new location11('Union Square Open Floor Plan'),
 	new location11('East Village Hip Studio'),
 	new location11('TriBeCa Artsy Bachelor Pad'),
-	new location11('Chinatown Homey Space')])
+	new location11('Chinatown Homey Space')]),
+	Time: ko.observableArray(["10","15","30","60"]),
+	choosedTime: ko.observable("10"),
+	Ways: ko.observableArray(["DRIVING","WALKING","BICYCLING","TRANSIT"]),
+	choosedWay: ko.observable("DRIVING"),
+	filterLocation: ko.observable("EX: Park Ave"),
+	zoomArea: ko.observable("Enter your favorite area!"),
+	viewRoute: ko.observable("Ex: Google Office NYC or 75 9th Ave, New York, NY"),
+	searchPlace: ko.observable("Ex: Pizza delivery in NYC"),
 };
 
-function location11 (name){
+function location11 (name) {
 	this.name = name;
-	this.appear=ko.observable(true);
 }
 // Create a new blank array for all the listing markers.
 var markers = [];
@@ -117,33 +124,29 @@ var searchWithinPolygon = function () {
 		if (google.maps.geometry.poly.containsLocation(markers[i].position, polygon)){
 			markers[i].setMap(map);
 		}
-		else
-		{
+		else {
 			markers[i].setMap(null);
 		}
 	}
-}
+};
 // This function allows the user to input a desired travel time, in
 // minutes, and a travel mode, and a location - and only show the listings
 // that are within that travel time (via that travel mode) of the location
-var searchWithinTime = function ()
-{
+var searchWithinTime = function () {
 	var distanceMatrixService = new google.maps.DistanceMatrixService();
 	var address = document.getElementById(
 		'search-within-time-text').value;
-	if (address === '')
-	{
+
+	if (address === '') {
 		window.alert('You must enter an address.');
 	}
-	else
-	{
+	else {
 		hide_listings();
 		// Use the distance matrix service to calculate the duration of the
           // routes between all our markers, and the destination address entered
           // by the user. Then put all the origins into an origin matrix.
 		var origins = [];
-		for (var i = 0 ; i < markers.length;i++)
-		{
+		for (var i = 0 ; i < markers.length;i++) {
 			origins[i] = markers[i].position;
 		}
 		var destination = address;
@@ -155,34 +158,29 @@ var searchWithinTime = function ()
 			travelMode: google.maps.TravelMode[mode],
 			unitSystem: google.maps.UnitSystem.IMPERIAL,
 		}, function(response, status) {
-			if (status !== google.maps.DistanceMatrixStatus.OK)
-			{
+			if (status !== google.maps.DistanceMatrixStatus.OK) {
 				window.alert('Error was: ' + status);
 			}
-			else
-			{
+			else {
 				display_marker(response);
 			}
 		});
 	}
-}
+};
 // This function fires when the user selects a searchbox picklist item.
 // It will do a nearby search using the selected query string or place.
-var searchBoxPlaces = function (searchBox) 
-{
+var searchBoxPlaces = function (searchBox) {
 	hide_markers(placeMarkers());
 	var places = searchBox.getPlaces();
 
 	create_marker_place(places);
-	if (places.length === 0)
-	{
+	if (places.length === 0) {
 		window.alert('We did not find any places matching that search!');
 	}
-}
+};
 // This function firest when the user select "go" on the places search.
 // It will do a nearby search using the entered query string or place.
-var textSearchPlaces = function () 
-{
+var textSearchPlaces = function () {
 	var bounds = map.getBounds();
 	//hideMarkers(placeMarkers);
 	hide_markers(placeMarkers());
@@ -195,12 +193,11 @@ var textSearchPlaces = function ()
 			createMarkersForPlaces(results);
 		}
 	});
-}
+};
 
 /*************View********/
 
-var initMap = function() 
-{
+var initMap = function() {
 	// Constructor creates a new map - only center and zoom are required.
 	map = new google.maps.Map(
 		document.getElementById('map'),{
@@ -247,8 +244,7 @@ var initMap = function()
     // mouses over the marker.
 	highlightedIcon = makeMarkerIcon('FFFF24');
 
-	for(var i = 0; i < locations.length; i++)
-	{
+	for(var i = 0; i < locations.length; i++) {
 		var position = locations[i].location;
 	  	var title = locations[i].title;
 	  	// Create a marker per location, and put into markers array.
@@ -260,7 +256,7 @@ var initMap = function()
 			id: i
 		});
 		markers.push(marker);
-		addlistenerstomarker(marker);
+		addListenersToMarker(marker, largeInfowindow);
 	}
 
 
@@ -323,7 +319,7 @@ var initMap = function()
 		if (polygon) {
 			polygon.setMap(null);
 			hideListings(markers);
-		}
+		} 
 		drawingManager.setDrawingMode(null);
 		polygon = event.overlay ;
 		polygon.setEditable(true);
@@ -336,28 +332,26 @@ var initMap = function()
 		window.alert(area+"  SQUARE METERS");
 	});
 	showListings();
-}
+};
 
-var addlistenerstomarker = function (marker)
-{
-	marker.addListener('click', function(){
-		populateInfoWindow(this,largeInfowindow);
+var addListenersToMarker = function (marker, largeInfowindow) {
+	marker.addListener('click', function() {
+		populateInfoWindow(this, largeInfowindow);
 	});
 	// Two event listeners - one for mouseover, one for mouseout,
     // to change the colors back and forth.
-	marker.addListener('mouseover', function(){
+	marker.addListener('mouseover', function() {
 		this.setIcon(highlightedIcon);
 	});
 
-	marker.addListener('mouseout', function(){
+	marker.addListener('mouseout', function() {
 		this.setIcon(defaultIcon);
 	});
-}
+};
 // This function populates the infowindow when the marker is clicked. We'll only allow
 // one infowindow which will open at the marker that is clicked, and populate based
 // on that markers position.
-var populateInfoWindow = function (marker, infowindow) 
-{
+var populateInfoWindow = function (marker, infowindow) {
 	// In case the status is OK, which means the pano was found, compute the
     // position of the streetview image, then calculate the heading, then get a
     // panorama from that and set the options
@@ -380,14 +374,12 @@ var populateInfoWindow = function (marker, infowindow)
 				document.getElementById('pano'), 
 				panoramaOptions);
 		}
-		else
-		{
+		else {
 			infowindow.setContent('<div>'+marker.title+'</div>'+
 				'<div>No Street View Found </div>');
 		}
 	}
-	if (infowindow.marker != marker) 
-	{
+	if (infowindow.marker != marker) {
 		infowindow.marker = marker;
 		infowindow.setContent('<div>' + 
 			marker.position + '</div>');
@@ -397,47 +389,42 @@ var populateInfoWindow = function (marker, infowindow)
 		});
 		var streetViewService = new google.maps.StreetViewService();
 		var radius = 50;
-		getStreetView(data, status); 
 		streetViewService.getPanoramaByLocation(
 			marker.position, radius, getStreetView);
 		infowindow.open(map, marker);
 	}
-}
+};
 
-var showInfoWindow = function (title_list)
-{
+var showInfoWindow = function (title_list) {
 	var largeInfowindow = new google.maps.InfoWindow();
 	for (var i = 0; i < markers.length; i++) {
 		if(title_list == markers[i].title) {
 			populateInfoWindow(markers[i],largeInfowindow);
 		}
 	}
-}
+};
 //show all markers
-var showListings = function () 
-{
+var showListings = function () {
 	var bounds = new google.maps.LatLngBounds();
 	for (var i = 0; i < markers.length; i++) {
 	 	markers[i].setMap(map);
 	 	bounds.extend(markers[i].position);
 	}
 	map.fitBounds(bounds);
-}
+};
 //hide all markers
-var hideListings = function ()
-{
+var hideListings = function () {
 	for (var i = 0; i < markers.length; i++) {
 	 	markers[i].setMap(null);
 	}	
-}
+};
 
-var hideMarkers = function (markers) 
-{
+var hideMarkers = function (markers) {
 	hideListings();
 	for (var i = 0; i < markers.length; i++) {
 	 	markers[i].setMap(null);
 	}
-}
+};
 // This function takes in a COLOR, and then creates a new marker
       // icon of that color. The icon will be 21 px wide by 34 high, have an origin
       // of 0, 0 and be anchored at 10, 34).
@@ -451,7 +438,7 @@ var makeMarkerIcon = function (markerColor) {
 		new google.maps.Size(21,34)		
 		);
 	return markerImage;
-}
+};
 // This shows and hides (respectively) the drawing options.
 var toggleDrawing = function (drawingManager) {
 	if (drawingManager.map) {
@@ -460,13 +447,10 @@ var toggleDrawing = function (drawingManager) {
 			polygon.setMap(null);
 		}
 	}
-	else
-	{
+	else {
 		drawingManager.setMap(map);
 	}
-}
-
-
+};
 
 var zoomToArea = function () {
 	var geocoder = new google.maps.Geocoder();
@@ -475,8 +459,7 @@ var zoomToArea = function () {
 	if (address === '') {
 		window.alert('You must enter an area, or address');
 	}
-	else 
-	{
+	else {
 		geocoder.geocode(
 			{
 				address: address,
@@ -494,12 +477,11 @@ var zoomToArea = function () {
 			}
 		);
 	}
-}
+};
 
 // This function will go through each of the results, and,
 // if the distance is LESS than the value in the picker, show it on the map.
-var displayMarkersWithinTime = function  (response)
-{
+var displayMarkersWithinTime = function  (response) {
 	var maxDuration = document.getElementById('max-duration').value;
 	var origins = response.originAddresses;
 	var destinations = response.destinationAddresses;
@@ -507,22 +489,18 @@ var displayMarkersWithinTime = function  (response)
         // Because there might be  multiple origins and destinations we have a nested loop
         // Then, make sure at least 1 result was found.
 	var atLeastOne = ko.observable(false);
-	for (var i = 0 ; i < origins.length; i++)
-	{
+	for (var i = 0 ; i < origins.length; i++) {
 		var results = response.rows[i].elements;
-		for (var j = 0; j < results.length; j++) 
-		{
+		for (var j = 0; j < results.length; j++) {
 			var element = results[j];
-			if (element.status === "OK")
-			{
+			if (element.status === "OK") {
 				// The distance is returned in feet, but the TEXT is in miles. If we wanted to switch
               // the function to show markers within a user-entered DISTANCE, we would need the
               // value for distance, but for now we only need the text.
 				var distanceText = element.distance.text;
 				var duration = element.duration.value / 60;
 				var durationText = element.duration.text;
-				if (duration <= maxDuration)
-				{
+				if (duration <= maxDuration) {
 					markers[i].setMap(map);
 					atLeastOne = ko.observable(true);
 					var infowindow = new google.maps.InfoWindow({
@@ -542,17 +520,15 @@ var displayMarkersWithinTime = function  (response)
 			}
 		}
 	}
-	if (!atLeastOne())
-	{
+	if (!atLeastOne()) {
 		window.alert('we could not find any ' +
 			'locations within that distance');
 	}
-}
+};
 // This function is in response to the user selecting "show route" on one
 // of the markers within the calculated distance. This will display the route
 // on the map.
-var displayDirections = function (origin)
-{
+var displayDirections = function (origin) {
 	hideListings();
 	var directionsService = new google.maps.DirectionsService();
 	// Get the destination address from the user entered value.
@@ -564,8 +540,8 @@ var displayDirections = function (origin)
 		origin: origin,
 		destination: destinationAddress,
 		travelMode: google.maps.TravelMode[mode]
-	}, function(response, status){
-		if (status === google.maps.DirectionsStatus.OK){
+	}, function(response, status) {
+		if (status === google.maps.DirectionsStatus.OK) {
 			var directionsDisplay = new google.maps.DirectionsRenderer({
 				map: map,
 				directions: response,
@@ -575,16 +551,14 @@ var displayDirections = function (origin)
 				}
 			});
 		}
-		else
-		{
+		else {
 			window.alert('Directions request failed due to ' + status);
 		}
 	});
-}
+};
 
  // This function creates markers for each place found in either places search.
-var createMarkersForPlaces = function (places)
-{
+var createMarkersForPlaces = function (places) {
 	var bounds = new google.maps.LatLngBounds();
 	for (var i = 0; i < places.length; i++) {
 		var place = places[i];
@@ -619,23 +593,22 @@ var createMarkersForPlaces = function (places)
 		}
 	}
 	map.fitBounds(bounds);
-}
+};
+
 var add = function (marker) {
 	marker.addListener('click', function(){
 		if (placeInfoWindow.marker == this) {
 			console.log("This infowindow already is on this marker!");
 		}
-		else
-		{
+		else {
 			getPlacesDetails(this, placeInfoWindow);
 		}
 	});
-}
+};
 // This is the PLACE DETAILS search - it's the most detailed so it's only
     // executed when a marker is selected, indicating the user wants more
     // details about that place.
-var getPlacesDetails = function  (marker, infowindow)
-{
+var getPlacesDetails = function  (marker, infowindow) {
 	var service = new google.maps.places.PlacesService(map);
 	service.getDetails({
 		placeId: marker.id
@@ -677,49 +650,41 @@ var getPlacesDetails = function  (marker, infowindow)
 			});
 		}
 	});
-}
+};
 
-var filterMarkersAndList = function () 
-{
+var filterMarkersAndList = function () {
 	var filterText = document.getElementById('filter-text').value;
-	if(filterText === '')
-	{
+	if(filterText === '') {
 		window.alert('You should write location');
 	}
-	else
-	{
+	else {
 		showListings();
 		var matched_location = ko.observableArray([]);
 		var unmatched_location = ko.observableArray([]);
 		for (var i = 0; i < list_locations().length; i++) {
-			if(!list_locations()[i].includes(filterText)) {
+			if(!list_locations()[i].toLowerCase().includes(filterText.toLowerCase())) {
 				//window.alert(list_locations[i]);
 				unmatched_location.push(i+1);
 			}
-			else
-			{
+			else {
 				matched_location.push(i+1);	
 			}
 		}
 		hideMarkerAndItemLocation(unmatched_location(), matched_location());
 	}
-}
+};
+
 var showVisibility = function (idd) {
     document.getElementById("location" + idd).style.display = "block";
-    document.getElementById("location" + idd).appear = ko.observable(true);
-}
+};
 
-var hideVisibility = function (idd) 
-{
+var hideVisibility = function (idd) {
     document.getElementById("location" + idd).style.display = "none";
-    document.getElementById("location" + idd).appear = ko.observable(false);
-}
+};
 // hide all unmatched locations
-var hideMarkerAndItemLocation = function (unmatched_location, matched_location)
-{
+var hideMarkerAndItemLocation = function (unmatched_location, matched_location) {
 	var largeInfowindow = new google.maps.InfoWindow();
-	for (var i = 0; i < unmatched_location.length; i++) 
-	{
+	for (var i = 0; i < unmatched_location.length; i++) {
 	 	markers[unmatched_location[i]-1].setMap(null);
 	 	//window.alert(unmatched_location[i]);
 	 	hideVisibility(unmatched_location[i]);
@@ -728,38 +693,33 @@ var hideMarkerAndItemLocation = function (unmatched_location, matched_location)
 	 	populateInfoWindow(markers[matched_location[i]],largeInfowindow);
 	}
 
-}
+};
 // show all markers and list
-var showAll = function ()
-{
+var showAll = function () {
 	if(!this.value) {
 		showListings();
 		for (var i = 0; i < 6; i++) {
 			showVisibility(i+1);
 		}
 	}
-}
+};
 /*********ViewModel****************/
 
-var hide_listings = function ()
-{
+var hide_listings = function () {
 	hideListings();
-}
+};
 
-var display_marker = function (response)
-{
+var display_marker = function (response) {
 	displayMarkersWithinTime(response);
-}
+};
 
-var hide_markers = function (placeMarkers)
-{
+var hide_markers = function (placeMarkers) {
 	hideMarkers(placeMarkers);
-}
+};
 
-var create_marker_place = function (places)
-{
+var create_marker_place = function (places) {
 	createMarkersForPlaces(places);
-}
+};
 
 
 ko.applyBindings(ViewModel);
