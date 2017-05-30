@@ -12,7 +12,7 @@ body {
 }
 
 input {
-	font-size: 12px;
+	font-size: 16px;
 }
 
 h1 {
@@ -84,5 +84,11 @@ hr {
 #places-search,
 #search-within-time-text {
 	width: 80%;
+}
+
+#location1, #location2,
+#location3, #location4,
+#location5, #location6 {
+	font-size: 18px;
 }
 
