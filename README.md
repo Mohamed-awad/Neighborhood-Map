@@ -26,6 +26,3 @@ The neighborhood map application is complex enough and incorporates a variety of
 * the list menu will filter automatic 
 
 
-# That`s It Cool
-
-
